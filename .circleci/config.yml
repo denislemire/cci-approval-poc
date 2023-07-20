@@ -16,7 +16,7 @@ jobs:
           name: deploy
           command: /bin/true
 workflows:
-  example:
+  approval-poc:
     jobs:
       - test
       - get-approval:
