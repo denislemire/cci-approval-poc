@@ -3,6 +3,7 @@
 # Retrieve the CircleCI API token from the environment variable
 TOKEN=$(op item get vdhoqk4qqmqyxm274lsajqhw2y --fields token)
 SLUG="gh/denislemire"
+MAX_HOURS=2
 
 function process_page() {
 	local page_token=$1
@@ -31,12 +32,16 @@ function get_pipeline() {
 		--header "Circle-Token: ${TOKEN}"
 	)
 
-	echo $RESPONSE | jq -r '.items[] | select(.status == "on_hold") | .'
-	workflow_id=$(echo $RESPONSE | jq -r '.items[] | select(.status == "on_hold") | .id')
+	filtered_ids=$(echo "$json_object" | jq -r --argjson max_hours "$MAX_HOURS" '
+		.items[]
+		| select(.status == "on_hold")
+		| select((.created_at | fromdateiso8601) < (now - ($max_hours * 3600)))
+		| .id
+	')
 
-	if [[ -n "$workflow_id" ]]; then
-		cancel_workflow "$workflow_id"
-	fi
+	for id in $filtered_ids; do
+		cancel_workflow "$id"
+	done
 };
 
 function cancel_workflow() {
