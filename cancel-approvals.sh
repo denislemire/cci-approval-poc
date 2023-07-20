@@ -3,10 +3,12 @@
 # Retrieve the CircleCI API token from the environment variable
 TOKEN=$(op item get vdhoqk4qqmqyxm274lsajqhw2y --fields token)
 SLUG="gh/denislemire"
-MAX_HOURS=2
+MAX_HOURS=0
 
 function process_page() {
 	local page_token=$1
+
+	echo "Retrieving pipelines..."
 
 	# Make the API request
 	RESPONSE=$(curl -s \
@@ -21,10 +23,12 @@ function process_page() {
 	while IFS= read -r pipeline_id; do
 		get_pipeline "$pipeline_id"
 	done <<< "$pipeline_ids"
-}
+};
 
 function get_pipeline() {
 	local pipeline_id=$1
+
+	echo "Retrieving workflows for ${pipeline_id}"
 
 	RESPONSE=$(curl -s \
 		--request GET \
@@ -32,17 +36,19 @@ function get_pipeline() {
 		--header "Circle-Token: ${TOKEN}"
 	)
 
-	filtered_ids=$(echo "$json_object" | jq -r --argjson max_hours "$MAX_HOURS" '
-		.items[]
-		| select(.status == "on_hold")
-		| select((.created_at | fromdateiso8601) < (now - ($max_hours * 3600)))
+	on_hold_json=$(echo "$RESPONSE" | jq -r '.items[] | select(.status == "on_hold")')
+
+	echo $on_hold_json | jq .
+
+	on_hold_and_old_ids=$(echo "$on_hold_json" | jq -r --argjson max_hours "$MAX_HOURS" '
+		select((.created_at | fromdateiso8601) < (now - ($max_hours * 3600)))
 		| .id
 	')
 
-	for id in $filtered_ids; do
+	for id in $on_hold_and_old_ids; do
 		cancel_workflow "$id"
 	done
-};
+}
 
 function cancel_workflow() {
 	local workflow_id=$1
