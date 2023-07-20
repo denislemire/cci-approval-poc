@@ -31,6 +31,7 @@ function get_pipeline() {
 		--header "Circle-Token: ${TOKEN}"
 	)
 
+	echo $RESPONSE | jq -r '.items[] | select(.status == "on_hold") | .'
 	workflow_id=$(echo $RESPONSE | jq -r '.items[] | select(.status == "on_hold") | .id')
 
 	if [[ -n "$workflow_id" ]]; then
@@ -49,7 +50,7 @@ function cancel_workflow() {
 		--header "Circle-Token: ${TOKEN}"
 	)
 
-	echo $RESONSE | jq .
+	echo $RESPONSE | jq .
 };
 
 # Process the first page
