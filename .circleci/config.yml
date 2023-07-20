@@ -1,0 +1,28 @@
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Run tests
+          command: /bin/true
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: deploy
+          command: /bin/true
+workflows:
+  example:
+    jobs:
+      - test
+      - get-approval:
+          type: approval
+          requires:
+            - test
+      - deploy:
+          requires:
+            - get-approval
