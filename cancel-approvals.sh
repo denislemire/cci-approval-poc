@@ -84,9 +84,9 @@ function cancel_workflow() {
 process_page ""
 
 # Process subsequent pages using the next page token
-NEXT_PAGE_CIRCLE_TOKEN=$(echo "$RESPONSE" | jq -r '.next_page_token')
+NEXT_PAGE_TOKEN=$(echo "$RESPONSE" | jq -r '.next_page_token')
 
-while [[ "$NEXT_PAGE_CIRCLE_TOKEN" != "null" ]]; do
-	process_page "&page-token=${NEXT_PAGE_CIRCLE_TOKEN}"
-	NEXT_PAGE_CIRCLE_TOKEN=$(echo "$RESPONSE" | jq -r '.next_page_token')
+while [[ "$NEXT_PAGE_TOKEN" != "null" ]]; do
+	process_page "&page-token=${NEXT_PAGE_TOKEN}"
+	NEXT_PAGE_TOKEN=$(echo "$RESPONSE" | jq -r '.next_page_token')
 done
