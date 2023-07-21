@@ -3,9 +3,11 @@
 MAX_HOURS=24
 
 if [ -z "$1" ] && [ -z "$SLUG" ]; then
-        echo "Usage: $0 gh/denislemire [hours] (defaults to 24)"
+        echo "Usage: $0 vcs_type/org_name [hours] (defaults to 24)"
         exit 1
 fi
+
+SLUG=$1
 
 if [ -z "$CIRCLE_TOKEN" ]; then
         echo "We need a token, please set CIRCLE_TOKEN env variable."
