@@ -1,0 +1,32 @@
+version: 2.1
+
+executors:
+  cimg-base:
+    docker:
+      - image: cimg/base:stable
+
+jobs:
+  say-hello:
+    executor: cimg-base
+    steps:
+      - run:
+          name: Say Hello
+          command: /bin/false
+
+  script-test:
+    executor: cimg-base
+    steps:
+      - checkout
+      - run:
+          name: Cancel approval
+          command: ./cancel-approvals.sh ${SLUG} 0
+workflows:
+  approval:
+    jobs:
+      - get-approval:
+          type: approval
+      - say-hello:
+          requires:
+            - get-approval
+      - script-test:
+           context: circleci-api
