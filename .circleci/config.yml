@@ -2,6 +2,7 @@ version: 2.1
 
 executors:
   cimg-base:
+    resource_class: small
     docker:
       - image: cimg/base:stable
 
